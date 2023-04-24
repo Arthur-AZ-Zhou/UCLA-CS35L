@@ -1,0 +1,8 @@
+#!/bin/bash
+
+while read line
+do 
+    if ! grep -q line "sorted.words"; then
+        echo "$line"
+    fi
+done < "${1:-/dev/stdin}"

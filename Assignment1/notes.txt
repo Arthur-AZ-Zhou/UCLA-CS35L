@@ -1,0 +1,54 @@
+1. Where are the sh, sleep, and type commands located?
+In the /usr/bin directory
+
+2. What executable programs in /usr/bin have names that are exactly three characters long and start with the two letters se, and what do they do?
+sed OPTIONS... [SCRIPTS] [INPUT]: stream editor edits text from an input based on given parameters
+set [OPTION] [ARGUMENTS]: sets or unsets a flag using OPTIONS with ARGUMENTS as parameter for position
+seq [OPTION] LAST/seq [OPTION] FIRST LAST/seq [OPTION] FIRST INC LAST: prints out a sequence of numbers
+
+3. When you execute the command named by the symbolic link /usr/local/cs/bin/emacs, which file actually is executed?
+The GNU Emacs manual file shows up, or the emacs-26.1 file
+
+4. What is the version number of the /usr/bin/gcc program? of the plain gcc program? Why are they different programs?
+For plain gcc, the version is 8.5.0 (we find this out by doing gcc -v). For the /usr/bin/gcc program we get 4.8.5 (we do this by doing /usr/bin/gcc -v).
+They're different executables as seen when you change your path.
+
+5. The chmod program changes permissions on a file. What does the symbolic mode u+sx,o-w mean, in terms of permissions?
+u + sx: lets your file be executable for you and the "s" allows you to set user ID
+o - w: removed writing permissions from the user.
+
+6. Use the find command to find all directories modified on or after the day of this class’s first lecture, that are located under (or are the same as) 
+the directory /usr/local/cs. If there are more than ten such directories, sort the directory names alphabetically and just just the first ten names.
+Use command find /usr/local/cs -type d -mtime -12, find under the desired directory (/usr/local/cs) -type d represents type directory and -mtime -12 means
+within the last 12 days.
+/usr/local/cs/bin
+
+7. Of the files in the same directory as find, how many of them are symbolic links?
+First cd into find and then do find /usr/bin/ -type l to find all the symbolic links, add | wc to find the number. 285 symbolic links.
+
+8. What is the oldest file in the /usr/lib64 directory? Use the last-modified time to determine age. Specify the name of the file without the /usr/lib64/ prefix. 
+Don't ignore files whose names start with ".", but do ignore files under subdirectories of /usr/lib64/. Consider files of all types, that is, 
+your answer might be a regular file, or a directory, or something else.
+run ls -lt | tail -1
+librom1394.so.0.3.0
+
+9. In Emacs, what commands have transpose in their name?
+C-t transposes 2 characters
+M-t transposes 2 words
+C-M-t transposes 2 balanced expressions
+C-x C-t transposes 2 lines
+M-x transpose-sentences transposes 2 sentences
+M-x transpose-paragraphs transposes 2 paragraphs
+M-x transpose-regions transposes 2 regions
+
+10. What does the Emacs yank function do, and how can you easily invoke it using keystrokes?
+C-y is the yank function, it takes the most recently killed text (do C-k to kill rest of line past cursor) and pastes it to where your cursor currently is.
+It takes back KILLED text, not deleted
+
+11. When looking at the directory /usr/bin, what's the difference between the output of the ls -l command, and the directory listing of the Emacs dired command?
+Some files are missing in Emacs' dired command, for example rapper is missing.
+
+12. Use the ps command to find your own login shell's process, all that process's ancestors, and all its descendants. 
+Some ps options that you might find useful include -e, -f, -j, -l, -t, -H, and -T.
+There's only bash running right now. Bash's parent is systemd and it's descendant is emacs which also has {emacs} descended off of it.
+So basic diagram: systemd - bash - emacs - {emacs}
