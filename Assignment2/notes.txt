@@ -24,3 +24,18 @@ It returns "except IOError as (errno, strerror)" because python3 doesn't like th
 
 What happens when your shuf.py script is invoked with Python 2 rather than Python 3, and why?
 It works fine
+
+3 BENCHMARKS:
+user:
+0m0.077s
+0m0.069s
+0m0.078s
+
+sys:
+0m0.010s
+0m0.007s
+0m0.011s
+
+CPU: Intel(R) Xeon(R) Silver 4116 CPU @ 2.10GHz
+
+System Version: 8.5 (Ootpa)

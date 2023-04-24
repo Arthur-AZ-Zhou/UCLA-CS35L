@@ -12,7 +12,13 @@ class shuf:
         for i in range (0, len(self.lines)):
             print(self.lines[i])
     
-    # def repeat_shuf(): DO LATER WHEN UNDERSTAND PYTHON
+    def repeat_shuf(self, count = ""):
+        if count:
+            for _ in range(int(count)):
+                print(random.choice(self.lines))
+        else:
+            while True:
+                print(random.choice(self.lines)) 
 
 def main():
     argparser = ap.ArgumentParser()
@@ -25,7 +31,9 @@ def main():
     argument = argparser.parse_args()
     lines = []
 
-    if argument.input: # file input
+    if argument.echo: # have to be in the front or else argument.input throws file opening error
+        lines = argument.input
+    elif argument.input: # file input
         if (len(argument.input) == 1):
             try: 
                 with open (argument.input[0]) as input_file:
@@ -34,9 +42,7 @@ def main():
             except:
                 sys.exit("Invalid input file!")
         else:
-            sys.exit("Too many imput arguments!")
-    elif argument.echo: 
-        lines = argument.input
+            sys.exit("Too many input arguments!")
     elif argument.input_range: # treats range of numbers as input
         try:
             split = argument.input_range.split('-')
@@ -47,4 +53,11 @@ def main():
         for line in sys.stdin:
             lines.append(line.strip('\n'))
 
-    
+    s = shuf(lines)
+    if argument.repeat:
+        s.repeat_shuf(argument.count)
+    else:
+        s.shuf()  
+
+if __name__ == "__main__":
+    main()
