@@ -1,0 +1,16 @@
+1. 14th perfect number or 2**(607 - 1) * (2**607 - 1): 14105378370671206906320795808606318988148674351471566783883867599995486774265238011410419332903769025156195
+056870982932716408772436637008711673126815931365248745065243980587729620729744672329516665822884692680778665287018892086787945147836456931392206037069506473607
+3572378695176473055266826253284886383715072974324463835300053138429460296575143368065570759537328128
+
+1. How many bits: We know loga(xy) = loga(x) + loga(y). We know log2(2**(607 - 1)) = 606 due to basic log properties, that leaves us calculating log2(2**607 - 1).
+logb(2**607 - 1) gives us 606, or the number of bits needed to store the number. As a result the answer is 606 + 606 = 1212
+
+2. Typing C-h k C-h k gives the manual/description on how to use C-h k. C-h k is the command to enter and the prompt you enter is the command you want the 
+description on.
+
+3. It's the command (just-one-space &optional N)
+It deletes all spaces and tabs around a point, leaving one space or N spaces
+depending on how many arguments given. If N is negative it deletes newlines too 
+leaving -N spaces.
+
+4. (just-one-space &optional N) to leave N spaces or remove newlines if N negative
