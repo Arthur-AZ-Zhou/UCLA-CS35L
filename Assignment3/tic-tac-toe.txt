@@ -1,0 +1,15 @@
+The most significant challenge was setting up the environment in Visual Studio Code to begin working
+
+We first had to install Node.js and then we had to install npm because windows didn't have it. After installing npm, we run the command
+"npm install npm" and then run "npm install react react-dom" to install the proper environment.
+
+Then we type in "npx create-react-app name_of_app", right now we'll name our app tic-tac-toe. We then cd into tic-tae-toe and then type in "npm start" and open
+the local host (http://localhost:3000) to see real-time changes. "index.js" contains what is shown on the website and contains all the imports from the other
+files, such as "App.js". "App.js" contains a functionality, such as in this case a rotating atom as the logo. 
+
+So we have everything done in our local environment. But personally I prefer working in my virtual linux workspace. So I typed in the code for a "Hello World"
+program into my index.js and made the transition to Ubuntu 20.04.
+
+We now find ourselves in Ubuntu 20.04 and it's time to put the notes we wrote to test. We first cd into the folder which we want to work in and begin the 
+installations. We use sudo to install Node.js and npm using "sudo apt install nodejs" and "sudo apt install npm" respectively. We then run the same command 
+"npm install react react-dom". We then create a tic-tac-toe application as well using the command "npx create-react-app tic-tac-toe".
