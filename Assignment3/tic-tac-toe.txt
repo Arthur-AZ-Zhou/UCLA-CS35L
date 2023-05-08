@@ -12,4 +12,27 @@ program into my index.js and made the transition to Ubuntu 20.04.
 
 We now find ourselves in Ubuntu 20.04 and it's time to put the notes we wrote to test. We first cd into the folder which we want to work in and begin the 
 installations. We use sudo to install Node.js and npm using "sudo apt install nodejs" and "sudo apt install npm" respectively. We then run the same command 
-"npm install react react-dom". We then create a tic-tac-toe application as well using the command "npx create-react-app tic-tac-toe".
+"npm install react react-dom". We then create a tic-tac-toe application as well using the command "npx create-react-app tic-tac-toe". We start our project using
+"npm start" and begin hacking. 
+
+We copy the tutorial to make a simple tic-tac-toe game: https://react.dev/learn/tutorial-tic-tac-toe. We copypaste the setup to establish a simple X on our 
+webpage. We create a 3x3 row of X's. We then rename our main component to Board() and make a function called Square(). To have each square display a different 
+value we pass in a parameter called "value". You have to pass in value as {value} or else the box will try to write the literal "value" into itself.
+
+We then make the squares able to read clicks and print out data on the console - to open the console on Windows, we do shift + ctrl + j. 
+
+Changed the code a bit to use {useState} from 'react'. We made it so every time you clicked on a box an "x" would show up. We then added a lifting state for
+the Board() component and made an array of squares that update as the game goes on. The final product of arrays should look something like this:
+['O', null, 'X', 'X', 'X', 'O', 'O', null, null]. We then add the onClick handling for the array of squares. One interesting thing to note is that for each
+square, we use this syntax:
+    <Square value={squares[i]} onSquareClick={() => handleClick(i)} />
+to prevent infinite loops. slice() also creates a copy of the array, making sure the previous state is immutable and constructs a new array containing the next
+move. This is important because if you want a history function you can go to one of the older arrays. 
+
+Now we'll implement taking turns, or establishing the X's and O's. We do this by establishing "X" as the default move option and for every other turn we set
+setXIsNext() to its opposite state. This works but if you click on a square multiple times it'll keep switching signs. We prevent this by writing a return
+function if squares[i] contains something inside of it. 
+
+To find a winner, we just list out all the possible 3-in-a-row combinations. We just copy paste the given calculateWinner code from the tutorial.
+
+We implement history by following the tutorial, not many problems encountered.
