@@ -1,0 +1,1 @@
+First, we copypaste our tic-tac-toe code that doesn't contain history into our new App.js as a baseline for chorus-lapilli.
