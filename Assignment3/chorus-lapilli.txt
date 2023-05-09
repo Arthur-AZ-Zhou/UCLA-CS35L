@@ -1,2 +1,11 @@
-First, we copypaste our tic-tac-toe code into our new App.js as a baseline for chorus-lapilli. Our first course of action should be 
-to limit each player's maximum pieces to 3. 
+First, we copypaste our tic-tac-toe code into our new App.js as a baseline for chorus-lapilli. Our first course of action should be  to limit each player's 
+maximum pieces to 3. So we have a global variable that checks if it's turn 6. If the turn is greater than or less than 6 we put a return statement to 
+temporarily stop the player from making any more moves. To actually make sure that the user is limited to 3 moves, we have an empty array. Depending on whether
+it is X's or O's next move, we update two arrays containing the positions of the X's and O's. Now when it hits turn 6 or above, we will shift() away the first 
+element and push in the new array position at the end of the array and update our board respectively. 
+
+To implement the adjacent moving, we make a function called checkValidMove() that takes in the particular player's turn and the destination where the player
+wants to move. I then hard-coded every switch scenario that the player could move to depending on where their initial positions are. 
+
+I also implemented the part of the code that the middle square must be vacated if the player did not win the game or vacate the center square. The code will
+simply return INVALID MOVE in the console in that scenario.
