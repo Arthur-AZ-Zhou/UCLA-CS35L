@@ -1,0 +1,4 @@
+#!/bin/bash
+START=$1
+END=$2
+git diff $START $END
