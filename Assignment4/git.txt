@@ -1,0 +1,9 @@
+The branches are different in the git repository compared to mine. If I enter in the command, git branch, I will see only the "* master" branch inside of my
+clone. On the other hand if I do the same in the repository itself, I will see the branches:
+maint
+* master
+next
+seen
+todo
+
+So the branches are different.
