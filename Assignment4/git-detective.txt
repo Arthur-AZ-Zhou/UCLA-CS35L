@@ -1,0 +1,500 @@
+We type in git log -S "In read-only repositories" to find the commits containing the desired text and then we choose the earliest one and show the commit ID. 
+In this case it would be:
+    commit e85701b4af5b7c2a9f3a1b07858703318dce365d
+    Author: Junio C Hamano <gitster@pobox.com>
+    Date:   Mon Oct 10 10:09:09 2022 -0700
+
+        The (real) first batch for 2.39
+        
+        Signed-off-by: Junio C Hamano <gitster@pobox.com>
+
+We can append the git show e85701b4af5b7c2a9f3a1b07858703318dce365d to a file, let's do it in this file. We search it for the same text, "In read-only 
+repositories". The paragraph we find it in contains a merge ID: 
+    + * In read-only repositories, "git merge-tree" tried to come up with a
+    +   merge result tree object, which it failed (which is not wrong) and
+    +   led to a segfault (which is bad), which has been corrected.
+    +   (merge 92481d1b26 js/merge-ort-in-read-only-repo later to maint).
+
+We go to the merge ID via git show 92481d1b26, let's append it to the end of this file too. We find this line of text:
+    In the previous commit, we fixed a segmentation fault when a tree object
+    could not be written.
+
+Let's go to the previous commit to see how and who fixed the segmentation fault. We do this via git show 92481d1b26^, I'll append it at the end of this file 
+too. In the log, we find the lines: 
+    commit 0b55d930a69692c7f4e7b90e35fa41f6c46df4bc
+    Author: Johannes Schindelin <Johannes.Schindelin@gmx.de>
+    Date:   Wed Sep 28 07:29:21 2022 +0000
+
+        merge-ort: fix segmentation fault in read-only repositories
+        
+        If the blob/tree objects cannot be written, we really need the merge
+        operations to fail, and not to continue (and then try to access the tree
+        object which is however still set to `NULL`).
+        
+        Let's stop ignoring the return value of `write_object_file()` and
+        `write_tree()` and set `clean = -1` in the error case.
+        
+        Reviewed-by: Elijah Newren <newren@gmail.com>
+        Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
+        Signed-off-by: Junio C Hamano <gitster@pobox.com>
+From this, we can see Johannes Schindelin was the one who authored the changes which was then reviewed by Elijah Newren and signed off by both Johannes 
+Schindelin and Junio C Hamano. They realize that if blob/tree objects can't be written, they have to stop the operation itself before the segmentation fault.
+The way they do it is they ignore the return value of the methods write_object_file() and write_tree() and set the variable clean = -1 in the case of an error.
+
+
+
+These are the git log texts: 
+git show e85701b4af5b7c2a9f3a1b07858703318dce365d >>git-detective.txt =====================================================================================
+commit e85701b4af5b7c2a9f3a1b07858703318dce365d
+Author: Junio C Hamano <gitster@pobox.com>
+Date:   Mon Oct 10 10:09:09 2022 -0700
+
+    The (real) first batch for 2.39
+    
+    Signed-off-by: Junio C Hamano <gitster@pobox.com>
+
+diff --git a/Documentation/RelNotes/2.39.0.txt b/Documentation/RelNotes/2.39.0.txt
+index 3d27b72efc..a26c82444b 100644
+--- a/Documentation/RelNotes/2.39.0.txt
++++ b/Documentation/RelNotes/2.39.0.txt
+@@ -1,7 +1,15 @@
+ Git v2.39 Release Notes
+ =======================
+ 
++UI, Workflows & Features
++------------------------
++
++ * "git grep" learned to expand the sparse-index more lazily and on
++   demand in a sparse checkout.
++
++
+ Performance, Internal Implementation, Development Support etc.
++--------------------------------------------------------------
+ 
+  * With a bit of header twiddling, use the native regexp library on
+    macOS instead of the compat/ one.
+@@ -11,6 +19,13 @@ Performance, Internal Implementation, Development Support etc.
+  * Sources related to fuzz testing have been moved down to their own
+    directory.
+ 
++ * Most credential helpers ignored unknown entries in a credential
++   description, but a few died upon seeing them.  The latter were
++   taught to ignore them, too
++
++ * "scalar unregister" in a repository that is already been
++   unregistered reported an error.
++
+ 
+ Fixes since v2.38
+ -----------------
+@@ -19,4 +34,41 @@ Fixes since v2.38
+    accesses, which has been corrected.
+    (merge 4a6ed30f96 vd/fix-unaligned-read-index-v4 later to maint).
+ 
++ * Fix messages incorrectly marked for translation.
++   (merge 02cb8b9ee3 ah/fsmonitor-daemon-usage-non-l10n later to maint).
++
++ * "git fsck" failed to release contents of tree objects already used
++   from the memory, which has been fixed.
++   (merge 51b27747e5 jk/fsck-on-diet later to maint).
++
++ * "git clone" did not like to see the "--bare" and the "--origin"
++   options used together without a good reason.
++   (merge 3b910d6e29 jk/clone-allow-bare-and-o-together later to maint).
++
++ * "git remote rename" failed to rename a remote without fetch
++   refspec, which has been corrected.
++   (merge 5a97b38109 jk/remote-rename-without-fetch-refspec later to maint).
++
++ * Documentation on various Boolean GIT_* environment variables have
++   been clarified.
++   (merge 819fb68222 jc/environ-docs later to maint).
++
++ * "git rebase -i" can mistakenly attempt to apply a fixup to a commit
++   itself, which has been corrected.
++   (merge 3e367a5f2f ja/rebase-i-avoid-amending-self later to maint).
++
++ * "git multi-pack-index repack/expire" used to repack unreachable
++   cruft into a new pack, which have been corrected.
++   (merge b62ad5681f tb/midx-repack-ignore-cruft-packs later to maint).
++
++ * In read-only repositories, "git merge-tree" tried to come up with a
++   merge result tree object, which it failed (which is not wrong) and
++   led to a segfault (which is bad), which has been corrected.
++   (merge 92481d1b26 js/merge-ort-in-read-only-repo later to maint).
++
+  * Other code cleanup, docfix, build fix, etc.
++   (merge c34a6bd291 so/diff-merges-cleanup later to maint).
++   (merge 5e7c8b75e7 ab/test-malloc-with-sanitize-leak later to maint).
++   (merge 2a905f8fa8 ah/branch-autosetupmerge-grammofix later to maint).
++   (merge abcac2e19f rj/ref-filter-get-head-description-leakfix later to maint).
++   (merge 71e5473493 hn/parse-worktree-ref later to maint).
+
+git show 92481d1b26 >>git-detective.txt =====================================================================================================================
+commit 92481d1b26ab57525f5efe01d01c7a3d337b8df7
+Author: Johannes Schindelin <Johannes.Schindelin@gmx.de>
+Date:   Wed Sep 28 07:29:22 2022 +0000
+
+    merge-ort: return early when failing to write a blob
+    
+    In the previous commit, we fixed a segmentation fault when a tree object
+    could not be written.
+    
+    However, before the tree object is written, `merge-ort` wants to write
+    out a blob object (except in cases where the merge results in a blob
+    that already exists in the database). And this can fail, too, but we
+    ignore that write failure so far.
+    
+    Let's pay close attention and error out early if the blob could not be
+    written. This reduces the error output of t4301.25 ("merge-ort fails
+    gracefully in a read-only repository") from:
+    
+            error: insufficient permission for adding an object to repository database ./objects
+            error: error: Unable to add numbers to database
+            error: insufficient permission for adding an object to repository database ./objects
+            error: error: Unable to add greeting to database
+            error: insufficient permission for adding an object to repository database ./objects
+            fatal: failure to merge
+    
+    to:
+    
+            error: insufficient permission for adding an object to repository database ./objects
+            error: error: Unable to add numbers to database
+            fatal: failure to merge
+    
+    This is _not_ just a cosmetic change: Even though one might assume that
+    the operation would have failed anyway at the point when the new tree
+    object is written (and the corresponding tree object _will_ be new if it
+    contains a blob that is new), but that is not so: As pointed out by
+    Elijah Newren, when Git has previously been allowed to add loose objects
+    via `sudo` calls, it is very possible that the blob object cannot be
+    written (because the corresponding `.git/objects/??/` directory may be
+    owned by `root`) but the tree object can be written (because the
+    corresponding objects directory is owned by the current user). This
+    would result in a corrupt repository because it is missing the blob
+    object, and with this here patch we prevent that.
+    
+    Note: This patch adjusts two variable declarations from `unsigned` to
+    `int` because their purpose is to hold the return value of
+    `handle_content_merge()`, which is of type `int`. The existing users of
+    those variables are only interested whether that variable is zero or
+    non-zero, therefore this type change does not affect the existing code.
+    
+    Reviewed-by: Elijah Newren <newren@gmail.com>
+    Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
+    Signed-off-by: Junio C Hamano <gitster@pobox.com>
+
+diff --git a/merge-ort.c b/merge-ort.c
+index f3bdce1041..e5f41cce48 100644
+--- a/merge-ort.c
++++ b/merge-ort.c
+@@ -2807,6 +2807,8 @@ static int process_renames(struct merge_options *opt,
+ 							   pathnames,
+ 							   1 + 2 * opt->priv->call_depth,
+ 							   &merged);
++			if (clean_merge < 0)
++				return -1;
+ 			if (!clean_merge &&
+ 			    merged.mode == side1->stages[1].mode &&
+ 			    oideq(&merged.oid, &side1->stages[1].oid))
+@@ -2916,7 +2918,7 @@ static int process_renames(struct merge_options *opt,
+ 			struct version_info merged;
+ 
+ 			struct conflict_info *base, *side1, *side2;
+-			unsigned clean;
++			int clean;
+ 
+ 			pathnames[0] = oldpath;
+ 			pathnames[other_source_index] = oldpath;
+@@ -2937,6 +2939,8 @@ static int process_renames(struct merge_options *opt,
+ 						     pathnames,
+ 						     1 + 2 * opt->priv->call_depth,
+ 						     &merged);
++			if (clean < 0)
++				return -1;
+ 
+ 			memcpy(&newinfo->stages[target_index], &merged,
+ 			       sizeof(merged));
+@@ -3806,10 +3810,10 @@ static int write_completed_directory(struct merge_options *opt,
+ }
+ 
+ /* Per entry merge function */
+-static void process_entry(struct merge_options *opt,
+-			  const char *path,
+-			  struct conflict_info *ci,
+-			  struct directory_versions *dir_metadata)
++static int process_entry(struct merge_options *opt,
++			 const char *path,
++			 struct conflict_info *ci,
++			 struct directory_versions *dir_metadata)
+ {
+ 	int df_file_index = 0;
+ 
+@@ -3823,7 +3827,7 @@ static void process_entry(struct merge_options *opt,
+ 		record_entry_for_tree(dir_metadata, path, &ci->merged);
+ 		if (ci->filemask == 0)
+ 			/* nothing else to handle */
+-			return;
++			return 0;
+ 		assert(ci->df_conflict);
+ 	}
+ 
+@@ -3870,7 +3874,7 @@ static void process_entry(struct merge_options *opt,
+ 		 */
+ 		if (ci->filemask == 1) {
+ 			ci->filemask = 0;
+-			return;
++			return 0;
+ 		}
+ 
+ 		/*
+@@ -4065,7 +4069,7 @@ static void process_entry(struct merge_options *opt,
+ 	} else if (ci->filemask >= 6) {
+ 		/* Need a two-way or three-way content merge */
+ 		struct version_info merged_file;
+-		unsigned clean_merge;
++		int clean_merge;
+ 		struct version_info *o = &ci->stages[0];
+ 		struct version_info *a = &ci->stages[1];
+ 		struct version_info *b = &ci->stages[2];
+@@ -4074,6 +4078,8 @@ static void process_entry(struct merge_options *opt,
+ 						   ci->pathnames,
+ 						   opt->priv->call_depth * 2,
+ 						   &merged_file);
++		if (clean_merge < 0)
++			return -1;
+ 		ci->merged.clean = clean_merge &&
+ 				   !ci->df_conflict && !ci->path_conflict;
+ 		ci->merged.result.mode = merged_file.mode;
+@@ -4169,6 +4175,7 @@ static void process_entry(struct merge_options *opt,
+ 
+ 	/* Record metadata for ci->merged in dir_metadata */
+ 	record_entry_for_tree(dir_metadata, path, &ci->merged);
++	return 0;
+ }
+ 
+ static void prefetch_for_content_merges(struct merge_options *opt,
+@@ -4285,7 +4292,10 @@ static int process_entries(struct merge_options *opt,
+ 			record_entry_for_tree(&dir_metadata, path, mi);
+ 		else {
+ 			struct conflict_info *ci = (struct conflict_info *)mi;
+-			process_entry(opt, path, ci, &dir_metadata);
++			if (process_entry(opt, path, ci, &dir_metadata) < 0) {
++				ret = -1;
++				goto cleanup;
++			};
+ 		}
+ 	}
+ 	trace2_region_leave("merge", "processing", opt->repo);
+
+git show 92481d1b26^ >>git-detective.txt ==================================================================================================================
+commit 0b55d930a69692c7f4e7b90e35fa41f6c46df4bc
+Author: Johannes Schindelin <Johannes.Schindelin@gmx.de>
+Date:   Wed Sep 28 07:29:21 2022 +0000
+
+    merge-ort: fix segmentation fault in read-only repositories
+    
+    If the blob/tree objects cannot be written, we really need the merge
+    operations to fail, and not to continue (and then try to access the tree
+    object which is however still set to `NULL`).
+    
+    Let's stop ignoring the return value of `write_object_file()` and
+    `write_tree()` and set `clean = -1` in the error case.
+    
+    Reviewed-by: Elijah Newren <newren@gmail.com>
+    Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
+    Signed-off-by: Junio C Hamano <gitster@pobox.com>
+
+diff --git a/merge-ort.c b/merge-ort.c
+index 99dcee2db8..f3bdce1041 100644
+--- a/merge-ort.c
++++ b/merge-ort.c
+@@ -3571,15 +3571,15 @@ static int tree_entry_order(const void *a_, const void *b_)
+ 				 b->string, strlen(b->string), bmi->result.mode);
+ }
+ 
+-static void write_tree(struct object_id *result_oid,
+-		       struct string_list *versions,
+-		       unsigned int offset,
+-		       size_t hash_size)
++static int write_tree(struct object_id *result_oid,
++		      struct string_list *versions,
++		      unsigned int offset,
++		      size_t hash_size)
+ {
+ 	size_t maxlen = 0, extra;
+ 	unsigned int nr;
+ 	struct strbuf buf = STRBUF_INIT;
+-	int i;
++	int i, ret = 0;
+ 
+ 	assert(offset <= versions->nr);
+ 	nr = versions->nr - offset;
+@@ -3605,8 +3605,10 @@ static void write_tree(struct object_id *result_oid,
+ 	}
+ 
+ 	/* Write this object file out, and record in result_oid */
+-	write_object_file(buf.buf, buf.len, OBJ_TREE, result_oid);
++	if (write_object_file(buf.buf, buf.len, OBJ_TREE, result_oid))
++		ret = -1;
+ 	strbuf_release(&buf);
++	return ret;
+ }
+ 
+ static void record_entry_for_tree(struct directory_versions *dir_metadata,
+@@ -3625,13 +3627,13 @@ static void record_entry_for_tree(struct directory_versions *dir_metadata,
+ 			   basename)->util = &mi->result;
+ }
+ 
+-static void write_completed_directory(struct merge_options *opt,
+-				      const char *new_directory_name,
+-				      struct directory_versions *info)
++static int write_completed_directory(struct merge_options *opt,
++				     const char *new_directory_name,
++				     struct directory_versions *info)
+ {
+ 	const char *prev_dir;
+ 	struct merged_info *dir_info = NULL;
+-	unsigned int offset;
++	unsigned int offset, ret = 0;
+ 
+ 	/*
+ 	 * Some explanation of info->versions and info->offsets...
+@@ -3717,7 +3719,7 @@ static void write_completed_directory(struct merge_options *opt,
+ 	 * strcmp here.)
+ 	 */
+ 	if (new_directory_name == info->last_directory)
+-		return;
++		return 0;
+ 
+ 	/*
+ 	 * If we are just starting (last_directory is NULL), or last_directory
+@@ -3739,7 +3741,7 @@ static void write_completed_directory(struct merge_options *opt,
+ 		 */
+ 		string_list_append(&info->offsets,
+ 				   info->last_directory)->util = (void*)offset;
+-		return;
++		return 0;
+ 	}
+ 
+ 	/*
+@@ -3769,8 +3771,9 @@ static void write_completed_directory(struct merge_options *opt,
+ 		 */
+ 		dir_info->is_null = 0;
+ 		dir_info->result.mode = S_IFDIR;
+-		write_tree(&dir_info->result.oid, &info->versions, offset,
+-			   opt->repo->hash_algo->rawsz);
++		if (write_tree(&dir_info->result.oid, &info->versions, offset,
++			       opt->repo->hash_algo->rawsz) < 0)
++			ret = -1;
+ 	}
+ 
+ 	/*
+@@ -3798,6 +3801,8 @@ static void write_completed_directory(struct merge_options *opt,
+ 	/* And, of course, we need to update last_directory to match. */
+ 	info->last_directory = new_directory_name;
+ 	info->last_directory_len = strlen(info->last_directory);
++
++	return ret;
+ }
+ 
+ /* Per entry merge function */
+@@ -4214,8 +4219,8 @@ static void prefetch_for_content_merges(struct merge_options *opt,
+ 	oid_array_clear(&to_fetch);
+ }
+ 
+-static void process_entries(struct merge_options *opt,
+-			    struct object_id *result_oid)
++static int process_entries(struct merge_options *opt,
++			   struct object_id *result_oid)
+ {
+ 	struct hashmap_iter iter;
+ 	struct strmap_entry *e;
+@@ -4224,11 +4229,12 @@ static void process_entries(struct merge_options *opt,
+ 	struct directory_versions dir_metadata = { STRING_LIST_INIT_NODUP,
+ 						   STRING_LIST_INIT_NODUP,
+ 						   NULL, 0 };
++	int ret = 0;
+ 
+ 	trace2_region_enter("merge", "process_entries setup", opt->repo);
+ 	if (strmap_empty(&opt->priv->paths)) {
+ 		oidcpy(result_oid, opt->repo->hash_algo->empty_tree);
+-		return;
++		return 0;
+ 	}
+ 
+ 	/* Hack to pre-allocate plist to the desired size */
+@@ -4270,8 +4276,11 @@ static void process_entries(struct merge_options *opt,
+ 		 */
+ 		struct merged_info *mi = entry->util;
+ 
+-		write_completed_directory(opt, mi->directory_name,
+-					  &dir_metadata);
++		if (write_completed_directory(opt, mi->directory_name,
++					      &dir_metadata) < 0) {
++			ret = -1;
++			goto cleanup;
++		}
+ 		if (mi->clean)
+ 			record_entry_for_tree(&dir_metadata, path, mi);
+ 		else {
+@@ -4291,12 +4300,16 @@ static void process_entries(struct merge_options *opt,
+ 		fflush(stdout);
+ 		BUG("dir_metadata accounting completely off; shouldn't happen");
+ 	}
+-	write_tree(result_oid, &dir_metadata.versions, 0,
+-		   opt->repo->hash_algo->rawsz);
++	if (write_tree(result_oid, &dir_metadata.versions, 0,
++		       opt->repo->hash_algo->rawsz) < 0)
++		ret = -1;
++cleanup:
+ 	string_list_clear(&plist, 0);
+ 	string_list_clear(&dir_metadata.versions, 0);
+ 	string_list_clear(&dir_metadata.offsets, 0);
+ 	trace2_region_leave("merge", "process_entries cleanup", opt->repo);
++
++	return ret;
+ }
+ 
+ /*** Function Grouping: functions related to merge_switch_to_result() ***/
+@@ -4928,15 +4941,18 @@ static void merge_ort_nonrecursive_internal(struct merge_options *opt,
+ 	}
+ 
+ 	trace2_region_enter("merge", "process_entries", opt->repo);
+-	process_entries(opt, &working_tree_oid);
++	if (process_entries(opt, &working_tree_oid) < 0)
++		result->clean = -1;
+ 	trace2_region_leave("merge", "process_entries", opt->repo);
+ 
+ 	/* Set return values */
+ 	result->path_messages = &opt->priv->conflicts;
+ 
+-	result->tree = parse_tree_indirect(&working_tree_oid);
+-	/* existence of conflicted entries implies unclean */
+-	result->clean &= strmap_empty(&opt->priv->conflicted);
++	if (result->clean >= 0) {
++		result->tree = parse_tree_indirect(&working_tree_oid);
++		/* existence of conflicted entries implies unclean */
++		result->clean &= strmap_empty(&opt->priv->conflicted);
++	}
+ 	if (!opt->priv->call_depth) {
+ 		result->priv = opt->priv;
+ 		result->_properly_initialized = RESULT_INITIALIZED;
+diff --git a/t/t4301-merge-tree-write-tree.sh b/t/t4301-merge-tree-write-tree.sh
+index 28ca5c38bb..013b77144b 100755
+--- a/t/t4301-merge-tree-write-tree.sh
++++ b/t/t4301-merge-tree-write-tree.sh
+@@ -810,4 +810,13 @@ test_expect_success 'can override merge of unrelated histories' '
+ 	test_cmp expect actual
+ '
+ 
++test_expect_success SANITY 'merge-ort fails gracefully in a read-only repository' '
++	git init --bare read-only &&
++	git push read-only side1 side2 side3 &&
++	test_when_finished "chmod -R u+w read-only" &&
++	chmod -R a-w read-only &&
++	test_must_fail git -C read-only merge-tree side1 side3 &&
++	test_must_fail git -C read-only merge-tree side1 side2
++'
++
+ test_done
