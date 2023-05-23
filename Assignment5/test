@@ -1,0 +1,11 @@
+#!/bin/bash
+
+test="./randall 10"
+wordcount=$( $test | wc -c )
+
+if [ $wordcount -eq 10 ];
+    then
+        echo "SUCCESS"
+    else
+        echo "FAIL"
+fi

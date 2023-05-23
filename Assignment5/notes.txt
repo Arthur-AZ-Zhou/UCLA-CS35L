@@ -1,0 +1,51 @@
+Note to self: DO NOT DO THIS ON YOUR LOCAL MACHINE, I SPENT 3 HOURS TRYING TO DEBUG WHAT WAS WRONG WITH MAKE FOR MY FRIENDS TO TELL ME TO DO THIS ON SEASNET.
+
+Anyways, so after that whole fiasco this is what I did: I first downloaded the tar file and put it in my local machine's download folder and moved it via WinSCP to
+Seasent. Afterwards, I extracted it into a folder called CS35L/ via tar -xvzf randall-git.tgz and then I cloned it via git clone .git Assignment5/ into my 
+desired folder. 
+
+To do 'make check', we add this at the bottom of Makefile: 
+    check: randall test
+	    ./test
+We run our 'make check' command by making a new file called test, with a simple shell program to check if "./randall 10" is the correct length.
+
+To split randall.c into the separate files, we copy paste the desired parts into the different files, make the header files and type in the include guards, and 
+we remove any instances of the keyword static so the variables are private to each of their files. We also rewrite randall: ... in Makefile to include our
+new files and put all of them into an executable called randall: 
+    randall: randall.c options.c output.c rand64-sw.c rand64-hw.c
+	    $(CC) $(CFLAGS) $^ -o $@
+
+To do the -i, I added functions to rand64-sw.c and .h to include options for mrand48, rdand, and a file being passed in. I did this by altering the intial read
+file to read from the passed in file if invalid we read from random and I added functiosn to the end of rand64-sw.c that implements the mrand48 option.
+
+For -o, if the target is "stdio", the program behaves the way it is. If it's another string, we check if it's a valid number and if it is we set max block size to
+that number. In the output file we write each line by the maximize size of block (if changed). 
+
+Tests:
+time dd if=/dev/urandom ibs=8192 obs=8192 count=16384 >/dev/null
+16384+0 records in
+16384+0 records out
+134217728 bytes (134 MB, 128 MiB) copied, 0.71559 s, 188 MB/s
+
+real    0m0.727s
+user    0m0.013s
+sys     0m0.713s
+
+time ./randall 133562368 >/dev/null
+real    3m13.002s
+user    0m4.438s
+sys     2m53.369s
+
+time ./randall 133562368 | cat >/dev/null
+real    3m3.251s
+user    0m5.213s
+sys     2m34.481s
+
+time ./randall 133562368 >rand.data
+real    3m40.294s
+user    0m4.984s
+sys     2m54.329s
+
+Before we submit, we change assignment-files: in Makefile to
+    assignment-files = COPYING Makefile randall.c options.c options.h output.c output.h rand64-hw.c rand64-hw.h rand64-sw.c rand64-sw.h notes.txt test
+So the command "make submission-tarball" includes a zipped version of all the files.
